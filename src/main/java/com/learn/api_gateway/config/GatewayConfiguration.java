@@ -26,11 +26,11 @@ public class GatewayConfiguration {
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         // adding 2 rotes to first microservice as we need to log request body if method is POST
         return builder.routes()
-                .route("first-microservice",r -> r.path("/first")
+                .route("first-microservice",r -> r.path("/first/**")
                         .and().method("POST")
                         .and().readBody(Student.class, s -> true).filters(f -> f.filters(requestFilter, authFilter))
                         .uri("http://localhost:8081"))
-                .route("first-microservice",r -> r.path("/first")
+                .route("first-microservice",r -> r.path("/first/**")
                         .and().method("GET").filters(f-> f.filters(authFilter))
                         .uri("http://localhost:8081"))
                 .route("second-microservice",r -> r.path("/second")
