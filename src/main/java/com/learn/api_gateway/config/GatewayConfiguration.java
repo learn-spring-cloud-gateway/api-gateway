@@ -40,8 +40,8 @@ public class GatewayConfiguration {
                 .route("second-microservice",r -> r.path("/second")
                         .and().method("GET").filters(f-> f.filters(authFilter))
                         .uri("http://localhost:8082"))
-                /*.route("auth-server",r -> r.path("/login")
-                        .uri("http://localhost:8088"))*/
+                .route("auth-server",r -> r.path("/login")
+                        .uri("http://localhost:8088"))
                 .build();
     }
 

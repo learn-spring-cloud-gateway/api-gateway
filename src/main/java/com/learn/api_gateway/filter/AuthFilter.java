@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 @Component
 @RefreshScope
 public class AuthFilter implements GatewayFilter {
@@ -38,7 +40,7 @@ public class AuthFilter implements GatewayFilter {
             System.out.println("Authentication is disabled. To enable it, make \"authentication.enabled\" property as true");
             return chain.filter(exchange);
         }
-        String token ="";
+        String token;
         ServerHttpRequest request = exchange.getRequest();
 
         if(routeValidator.isSecured.test(request)) {
@@ -48,10 +50,13 @@ public class AuthFilter implements GatewayFilter {
                 return this.onError(exchange,"Credentials missing", HttpStatus.UNAUTHORIZED);
             }
             if (request.getHeaders().containsKey("userName") && request.getHeaders().containsKey("role")) {
-                token = authUtil.getToken(request.getHeaders().get("userName").toString(), request.getHeaders().get("role").toString());
+                token = authUtil.getToken(
+                        Objects.requireNonNull(request.getHeaders().get("userName")).toString(),
+                        Objects.requireNonNull(request.getHeaders().get("role")).toString()
+                );
             }
             else {
-                token = request.getHeaders().get("Authorization").toString().split(" ")[1];
+                token = Objects.requireNonNull(request.getHeaders().get("Authorization")).toString().split(" ")[1];
             }
 
             if(jwtUtil.isInvalid(token)) {
@@ -78,7 +83,7 @@ public class AuthFilter implements GatewayFilter {
 
 
     private boolean isCredsMissing(ServerHttpRequest request) {
-        return !(request.getHeaders().containsKey("userName") && request.getHeaders().containsKey("role")) && !request.getHeaders().containsKey("Authorization");
+        return !(request.getHeaders().containsKey("username") && request.getHeaders().containsKey("role")) && !request.getHeaders().containsKey("Authorization");
     }
 
     private void populateRequestWithHeaders(ServerWebExchange exchange, String token) {
